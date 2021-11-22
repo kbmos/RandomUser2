@@ -6,7 +6,7 @@
   <div class="col-1">
 
   </div>
-	<div class="part col-3">
+	<div class="part">
 
 		<ul
 			class="items"
@@ -31,7 +31,7 @@
 			<li
 				*ngFor="let thing of things ; let i = index ;"
 				class="item"
-				[class.selected]="( i === thingIndex )">
+				[class.selected]="( i === thingIndex)">
 				{{ thing }}
 			</li>
 		</ul>
@@ -39,9 +39,7 @@
 	</div>
 </div>
 
+<div class="actions w-full">
 
-<div class="actions">
-	<button (click)="generateName()" autofocus class="action">
-		Generate Sprint Name
-	</button>
+  <button class="btn btn-primary" [disabled]="isLoading" (click)="generateName()"><i class="fa" [ngClass]="{'fa-spin fa-spinner': isLoading, 'fa-check': !isLoading}"></i> Generate Sprint Name</button>
 </div>

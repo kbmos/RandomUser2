@@ -99,9 +99,14 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.less"
+              "src/styles.less",
+              "node_modules/bootstrap-less/bootstrap/bootstrap.less",
+              "node_modules/bootstrap/dist/cssbootstrap.css"
             ],
-            "scripts": []
+            "scripts": [
+              "../node_modules/bootstrap/dist/js/bootstrap.min.js",
+              "../node_modules/jquery/dist/jquery.min.js"
+            ]
           }
         }
       }

@@ -15,17 +15,20 @@ import { ThrowStmt } from "@angular/compiler";
 	templateUrl: "./app.component.html"
 })
 export class AppComponent {
-
+  public isLoading: boolean;
 	public descriptionIndex: number;
 	public descriptions: string[];
 	public sprintName: string;
 	public thingIndex: number;
 	public things: string[];
+	data_loop:any;
+	test: string = "";
+
   public gotItemIndex: number[]=[];
 
 	// I initialize the app component.
 	constructor(protected http: HttpClient) {
-
+    this.isLoading=false;
 		this.descriptionIndex = 0;
 		this.descriptions = descriptions;
 		this.sprintName = "";
@@ -36,12 +39,15 @@ export class AppComponent {
     // var gotItemIndex =new Array();
 
 	}
+
+
   ngOnInit() {
 
-   this.http.get(`http://192.0.0.46:8095/api/employee/employeelist`, {}).subscribe((res:any) =>{
+    this.http.get(`http://192.0.0.46:8095/api/employee/employeelist`, {}).subscribe((res:any) =>{
     const data:any = res;
+	this.data_loop = data;
 	console.log("Success",data);
-    for(var y=0;y<10;y++){
+    //for(var y=0;y<10;y++){
         for(var x=0 ;x< data.length;x++)
         {
           if(x==0){ //เริ่มครั้งแรกให้ใส่ค่าว่าง
@@ -67,7 +73,10 @@ export class AppComponent {
           // this.descriptions
 
           }
-        }
+    //    }
+
+
+		console.log(this.things);
 
    });
   }
@@ -79,12 +88,12 @@ export class AppComponent {
 	// I generate the next Sprint Name by randomly selecting a Description and a Thing
 	// and then joining the two values.
 	public generateName() : void {
-
-
+    console.log("this.isLoading = true");
+    this.isLoading = true;
 		// Randomly select next parts of the name.
 		this.descriptionIndex = this.nextIndex( this.descriptionIndex, this.descriptions );
-		this.descriptionIndex=1;
-		this.thingIndex = this.nextIndex( this.thingIndex, this.things );
+		//this.descriptionIndex=1;
+		//this.thingIndex = this.nextIndex( this.thingIndex, this.things );
     this.thingIndex= 	this.descriptionIndex;
     console.log("Description length : "+this.descriptions.length," things length :"+this.things.length);
     // this.descriptionIndex=0;
@@ -105,8 +114,31 @@ export class AppComponent {
 		);
 
 		this.shareSprintNameWithUser( this.sprintName );
+    setTimeout(() => {
+      // this.isLoading = false;
+      // this.button = 'Submit';
+      console.log("Waiting")
+      // alert('Done loading');
+      this.isLoading=false;
+    }, 10500)
+    console.log("this.isLoading = false");
+
 
 	}
+
+	public delay(ms: number) {
+    console.log("delay 10 sec")
+		return new Promise( resolve => setTimeout(resolve, ms) );
+	}
+
+
+	// public generate2() : void {
+	// 	for(var x=0 ;x< this.data_loop.length;x++) {
+	// 		this.test = this.data_loop[x].name;
+	// 		this.delay(300);
+	// 		console.log(this.test);
+	// 	}
+	// }
 
 	// ---
 	// PRIVATE METHODS.
@@ -127,6 +159,7 @@ export class AppComponent {
 		var textarea: HTMLTextAreaElement = document.createElement( "textarea" );
 		textarea.style.opacity = "0";
 		textarea.style.position = "fixed";
+		//console.log("VALUE : ",value);
 		textarea.value = value;
 		// Set and select the value (creating an active Selection range).
 		document.body.appendChild( textarea );
@@ -163,7 +196,7 @@ export class AppComponent {
 
 	// I return a random index for selection within the given collection.
 	private nextIndex( currentIndex: number, collection: any[] ) : number {
-
+		console.log(currentIndex)
 		var nextIndex = currentIndex;
 		var length = 1004;
     // var length = collection.length;
@@ -172,7 +205,7 @@ export class AppComponent {
 		// Keep generating a random index until we get a non-matching value. This just
 		// ensures some "change" from generation to generation.
 		while ( nextIndex === currentIndex ) {
-
+			console.log("Loop.........................");
 			nextIndex = ( Math.floor( Math.random() * length ) );
 
 		}
