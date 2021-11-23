@@ -21,20 +21,25 @@ export class AppComponent {
 	public sprintName: string;
 	public thingIndex: number;
 	public things: string[];
-	data_loop:any;
+	public data_server:any;
+  public switchChange:boolean;
 	test: string = "";
+  public Displacement:number;
+  public descriptionIndex_before:number;
   // myimg: string="../assets/christmas-5709552.svg";
   public gotItemIndex: number[]=[];
 
 	// I initialize the app component.
 	constructor(protected http: HttpClient) {
+    this.Displacement=0;
     this.isLoading=false;
 		this.descriptionIndex = 0;
 		this.descriptions = descriptions;
 		this.sprintName = "";
 		this.thingIndex = 0;
 		this.things = things;
-
+    this.switchChange=false;
+    this.descriptionIndex_before=0;
 		// this.generateName();
     // var gotItemIndex =new Array();
 
@@ -45,38 +50,39 @@ export class AppComponent {
 
     this.http.get(`http://192.0.0.46:8095/api/employee/employeelist`, {}).subscribe((res:any) =>{
     const data:any = res;
-	this.data_loop = data;
-	console.log("Success",data);
-    //for(var y=0;y<10;y++){
+	this.data_server = data;
+	console.log("Success",this.data_server);
+  this.descriptions.push("")
+  this.things.push("");
+    for(var y=0;y<2;y++){
         for(var x=0 ;x< data.length;x++)
         {
-          if(x==0){ //เริ่มครั้งแรกให้ใส่ค่าว่าง
-            this.descriptions[x]="";
-            this.things[x] = "";
-          }
-          else{
+          // if(x==0){ //เริ่มครั้งแรกให้ใส่ค่าว่าง
+          //   this.descriptions[x]="";
+          //   this.things[x] = "";
+          // }
+          // else{
             this.descriptions.push(" "+data[x]['name']+" "+data[x]['surname']);
             if(data[x]['depT_CODE']=="00")
             {
               this.things.push ("สำนักงานใหญ่");
 
-              console.log(data.length);
+              // console.log(data.length);
             }
             else if(data[x]['depT_CODE']=="01")
               this.things.push("บริหาร");
             else
               this.things.push(data[x]['depT_CODE']);
-          }
+          // }
           // var user_Data = data[0]['name'];
           // console.log("Success",data[3]['name'],data[3]['depT_CODE']);
 
           // this.descriptions
 
           }
-    //    }
+       }
+          console.log("All data:",this.descriptions);
 
-
-		console.log(this.things);
 
    });
   }
@@ -88,22 +94,50 @@ export class AppComponent {
 	// I generate the next Sprint Name by randomly selecting a Description and a Thing
 	// and then joining the two values.
 	public generateName() : void {
+    setTimeout(() => {
+      this.playAudio();
+    }, 500)
+
     console.log("this.isLoading = true");
     this.isLoading = true;
-		// Randomly select next parts of the name.
-		this.descriptionIndex = this.nextIndex( this.descriptionIndex, this.descriptions );
-		//this.descriptionIndex=1;
-		//this.thingIndex = this.nextIndex( this.thingIndex, this.things );
-    this.thingIndex= 	this.descriptionIndex;
-    console.log("Description length : "+this.descriptions.length," things length :"+this.things.length);
-    // this.descriptionIndex=0;
-    if(this.gotItemIndex.find(e => e === this.descriptionIndex)){
-		console.log("1");
-      this.descriptionIndex++;
-      this.thingIndex++;
-    }
+    this.descriptionIndex_before=this.descriptionIndex; //เก็บค่าตัว current index ก่อนมันเปลี่ยนค่าไปค่าที่ random ได้
+		this.descriptionIndex = this.nextIndex( this.descriptionIndex, this.descriptions ); //สุ่มหาตัวเลขที่แรนด้อมถัดไป
+    console.log("descriptionIndex After return func:",this.descriptionIndex);
+    // this.descriptionIndex=1;
+    this.Displacement= this.descriptionIndex-this.descriptionIndex_before; //หาค่ากระจัดระหว่างระยะห่างอันแรก กับ อันที่แรนด้อมได้ใหม่่
+    this.Displacement=Math.abs(this.Displacement);
 
-    this.gotItemIndex.push(this.descriptionIndex);
+    console.log("Displacement= "+this.Displacement+" descriptionIndex :"+(this.descriptionIndex)+" descriptionIndex_before: "+this.descriptionIndex_before+" Now this.switchChange = "+this.switchChange);
+
+    if( this.Displacement< 500 && this.switchChange==false){
+      console.log("descriptionIndex < 200 then change to :",this.descriptionIndex+this.data_server.length+ "switchChange= true ");
+      this.descriptionIndex+=this.data_server.length;
+      this.switchChange=true;
+      // this.descriptionIndex+= this.descriptions.length;
+      // console.log("");
+    }
+    else if( this.Displacement< 500 && this.switchChange==true){
+      console.log("descriptionIndex < 200 then change to :",this.descriptionIndex-this.data_server.length+"switchChange= false ");
+      this.descriptionIndex=this.descriptionIndex-this.data_server.length;
+      console.log("descriptionIndex LastChange : ",this.descriptionIndex);
+      this.switchChange=false;
+      // this.descriptionIndex+= this.descriptions.length;
+      // console.log("");
+    }
+    this.thingIndex = 	this.descriptionIndex;
+
+
+    // console.log("Description length : "+this.descriptions.length," things length :"+this.things.length);
+
+    // if(this.gotItemIndex.find(e => e === this.descriptionIndex)){
+		// console.log("1");
+    //   this.descriptionIndex++;
+    //   this.thingIndex++;
+    // }
+    if(this.descriptionIndex>this.data_server.length)
+      this.gotItemIndex.push(this.descriptionIndex-this.data_server.length-1);
+    else
+      this.gotItemIndex.push(this.descriptionIndex-1);
 
     console.log(this.gotItemIndex);
 		this.sprintName = (
@@ -112,21 +146,29 @@ export class AppComponent {
 			this.things[ this.thingIndex ]
 
 		);
-
-		this.shareSprintNameWithUser( this.sprintName );
+		this.shareSprintNameWithUser( this.sprintName ); //แสดง data ใน Log
     setTimeout(() => {
       console.log("Waiting")
       this.isLoading=false;
-    }, 6500)
+      this.playAudio_End();
+    }, 1000)
     console.log("this.isLoading = false");
 
 
 	}
 
-	public delay(ms: number) {
-    console.log("delay 10 sec")
-		return new Promise( resolve => setTimeout(resolve, ms) );
-	}
+  public playAudio(){
+    let audio = new Audio();
+    audio.src = "../assets/sounds/slot-machine-sound-effect (2).mp3";
+    audio.load();
+    audio.play();
+  }
+  public playAudio_End(){
+    let audio = new Audio();
+    audio.src = "../assets/sounds/mixkit-coin-win.wav";
+    audio.load();
+    audio.play();
+  }
 
 
 	// public generate2() : void {
@@ -193,17 +235,26 @@ export class AppComponent {
 
 	// I return a random index for selection within the given collection.
 	private nextIndex( currentIndex: number, collection: any[] ) : number {
-		console.log(currentIndex)
+		console.log("Current Index",currentIndex)
 		var nextIndex = currentIndex;
-		var length = 1004;
-    // var length = collection.length;
-    console.log(length);
+		var length = this.data_server.length;
+    // // var length = collection.length;
+    // console.log(length);
 
 		// Keep generating a random index until we get a non-matching value. This just
 		// ensures some "change" from generation to generation.
-		while ( nextIndex === currentIndex ) {
-			console.log("Loop.........................");
+		while ( nextIndex === currentIndex ) { //หมุนไปหาค่าที่กำหนด
+			// console.log("Loop.........................");
 			nextIndex = ( Math.floor( Math.random() * length ) );
+      console.log("User Index win : ",nextIndex);
+      if(nextIndex==0){
+        nextIndex=1;
+      }
+      else if(this.switchChange==true){
+        nextIndex+=(this.data_server.length);
+        console.log("Real Current Index: "+nextIndex);
+      }
+
 
 		}
 
