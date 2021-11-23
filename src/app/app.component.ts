@@ -23,7 +23,7 @@ export class AppComponent {
 	public things: string[];
 	data_loop:any;
 	test: string = "";
-
+  // myimg: string="../assets/christmas-5709552.svg";
   public gotItemIndex: number[]=[];
 
 	// I initialize the app component.
@@ -115,12 +115,9 @@ export class AppComponent {
 
 		this.shareSprintNameWithUser( this.sprintName );
     setTimeout(() => {
-      // this.isLoading = false;
-      // this.button = 'Submit';
       console.log("Waiting")
-      // alert('Done loading');
       this.isLoading=false;
-    }, 10500)
+    }, 6500)
     console.log("this.isLoading = false");
 
 
